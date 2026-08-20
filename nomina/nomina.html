@@ -539,6 +539,7 @@
   <button class="tab-btn" data-tab="pasos">Pasos</button>
   <button class="tab-btn" data-tab="bancos">Bancos</button>
   <button class="tab-btn" data-tab="config">Config</button>
+  <button class="tab-btn" data-tab="datos">Datos</button>
 </nav>
 
 <section id="desglose" class="active">
@@ -696,6 +697,21 @@
   </div>
 </section>
 
+<section id="datos">
+  <div class="extra-intro">
+    Exporta todos tus datos (Persona A, Persona B y lo compartido) a un archivo JSON de respaldo. También puedes importar un JSON —por ejemplo, uno generado a partir de tu información— para cargarlo directamente aquí.
+  </div>
+  <div class="section-title">Exportar</div>
+  <button class="add-btn" id="exportarDatosBtn">⬇ Exportar todo a JSON</button>
+
+  <div class="section-title" style="margin-top: 28px;">Importar</div>
+  <div class="extra-intro" style="font-size: 11.5px;">
+    Importar <strong>sobreescribe</strong> los campos incluidos en el archivo (Persona A, Persona B y compartidos). Los campos que el archivo no incluya no se tocan.
+  </div>
+  <input type="file" id="importarDatosInput" accept="application/json" style="display:none;">
+  <button class="add-btn" id="importarDatosBtn">⬆ Importar desde JSON</button>
+</section>
+
 <footer>v1 · datos guardados en este dispositivo</footer>
 
 <script>
@@ -758,26 +774,42 @@ function loadShared(key, fallback) {
 function saveShared(key, val) {
   try { localStorage.setItem(`nom_shared_${key}`, JSON.stringify(val)); } catch {}
 }
+// Igual que load(), pero para un modo concreto (no necesariamente el activo). Usado en export/import.
+function loadFor(m, key, fallback) {
+  try {
+    const v = localStorage.getItem(`nom_${m}_${key}`);
+    return v === null ? fallback : JSON.parse(v);
+  } catch { return fallback; }
+}
+function saveFor(m, key, val) {
+  try { localStorage.setItem(`nom_${m}_${key}`, JSON.stringify(val)); } catch {}
+}
+
+function snapshotModo(m) {
+  const defaultBanks = m === 'a' ? DEFAULT_BANKS_A : DEFAULT_BANKS_B;
+  const defaultSteps = m === 'a' ? DEFAULT_STEPS_A : DEFAULT_STEPS_B;
+  const defaultPropios = m === 'a' ? DEFAULT_PROPIOS_A : DEFAULT_PROPIOS_B;
+  return {
+    nomina: loadFor(m, 'nomina', 0),
+    ingles: loadFor(m, 'ingles', 0),
+    acciones: loadFor(m, 'acciones', 0),
+    ahorro: loadFor(m, 'ahorro', 0),
+    viajesFijo: loadFor(m, 'viajesFijo', 0),
+    compraComida: loadFor(m, 'compraComida', 0),
+    propios: loadFor(m, 'propios', defaultPropios),
+    extras: loadFor(m, 'extras', []),
+    banks: loadFor(m, 'banks', defaultBanks),
+    saldos: loadFor(m, 'saldos', defaultBanks.reduce((acc, b) => { acc[b.id] = 0; return acc; }, {})),
+    steps: loadFor(m, 'steps', defaultSteps),
+    stepsDone: loadFor(m, 'stepsDone', defaultSteps.map(() => false)),
+  };
+}
 
 let state = {};
 
 function reloadState() {
-  const defaultBanks = mode === 'a' ? DEFAULT_BANKS_A : DEFAULT_BANKS_B;
-  const defaultSteps = mode === 'a' ? DEFAULT_STEPS_A : DEFAULT_STEPS_B;
-  const defaultPropios = mode === 'a' ? DEFAULT_PROPIOS_A : DEFAULT_PROPIOS_B;
   state = {
-    nomina: load('nomina', 0),
-    ingles: load('ingles', 0),
-    acciones: load('acciones', 0),
-    ahorro: load('ahorro', 0),
-    viajesFijo: load('viajesFijo', 0),
-    compraComida: load('compraComida', 0),
-    propios: load('propios', defaultPropios),
-    extras: load('extras', []),
-    banks: load('banks', defaultBanks),
-    saldos: load('saldos', defaultBanks.reduce((acc, b) => { acc[b.id] = 0; return acc; }, {})),
-    steps: load('steps', defaultSteps),
-    stepsDone: load('stepsDone', defaultSteps.map(() => false)),
+    ...snapshotModo(mode),
     sueldoA: loadShared('sueldoA', 0),
     sueldoB: loadShared('sueldoB', 0),
     conceptos: loadShared('conceptos', DEFAULT_CONCEPTOS),
@@ -785,6 +817,49 @@ function reloadState() {
   };
 }
 reloadState();
+
+// =============== EXPORTAR / IMPORTAR JSON ===============
+// Formato: { version:1, exportedAt, shared:{sueldoA,sueldoB,conceptos,comidaConceptoId},
+//            a:{...campos de snapshotModo('a')...}, b:{...campos de snapshotModo('b')...} }
+function exportarDatos() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    shared: {
+      sueldoA: loadShared('sueldoA', 0),
+      sueldoB: loadShared('sueldoB', 0),
+      conceptos: loadShared('conceptos', DEFAULT_CONCEPTOS),
+      comidaConceptoId: loadShared('comidaConceptoId', 'comida'),
+    },
+    a: snapshotModo('a'),
+    b: snapshotModo('b'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `nomina-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importarDatos(data) {
+  if (!data || data.version !== 1) {
+    throw new Error('JSON no compatible (version != 1)');
+  }
+  if (data.shared) {
+    for (const [key, val] of Object.entries(data.shared)) saveShared(key, val);
+  }
+  for (const m of ['a', 'b']) {
+    if (data[m]) {
+      for (const [key, val] of Object.entries(data[m])) saveFor(m, key, val);
+    }
+  }
+  reloadState();
+  renderAll();
+}
 
 // =============== CALCS ===============
 function propiosTotal() { return state.propios.reduce((s, p) => s + (Number(p.amount) || 0), 0); }
@@ -1508,6 +1583,29 @@ document.getElementById('resetBanks').addEventListener('click', () => {
     save('saldos', state.saldos);
     renderBanks();
   }
+});
+
+document.getElementById('exportarDatosBtn').addEventListener('click', exportarDatos);
+
+document.getElementById('importarDatosBtn').addEventListener('click', () => {
+  document.getElementById('importarDatosInput').click();
+});
+
+document.getElementById('importarDatosInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      importarDatos(data);
+      alert('Datos importados correctamente.');
+    } catch (err) {
+      alert('Error al importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 });
 
 function renderAll() {

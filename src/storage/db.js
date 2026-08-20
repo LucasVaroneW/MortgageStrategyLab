@@ -4,6 +4,7 @@
 const DB_NAME = 'MortgageStrategyLabDB';
 const DB_VERSION = 1;
 const STORES = ['perfiles', 'propiedades', 'ofertasHipoteca', 'prestamosPersonales', 'estrategias', 'configuracion'];
+const CONFIG_ID = 'app';
 
 let dbPromise = null;
 
@@ -66,6 +67,16 @@ export async function put(storeName, item) {
   }));
 }
 
+export async function getConfiguracion() {
+  return getById('configuracion', CONFIG_ID);
+}
+
+// Fusiona con lo ya guardado (put no borra las claves que no se pasan aquí).
+export async function setConfiguracion(partial) {
+  const existente = (await getById('configuracion', CONFIG_ID)) || { id: CONFIG_ID };
+  return put('configuracion', { ...existente, ...partial, id: CONFIG_ID });
+}
+
 export async function remove(storeName, id) {
   return tx(storeName, 'readwrite', store => new Promise((resolve, reject) => {
     const req = store.delete(id);
@@ -113,6 +124,12 @@ export async function importAll(data, { mode = 'merge' } = {}) {
   for (const p of (data.ofertasHipoteca || [])) await put('ofertasHipoteca', p);
   for (const p of (data.prestamosPersonales || [])) await put('prestamosPersonales', p);
   for (const p of (data.estrategias || [])) await put('estrategias', p);
+  if (data.supuestos || data.configuracionRanking) {
+    await setConfiguracion({
+      ...(data.supuestos ? { supuestos: data.supuestos } : {}),
+      ...(data.configuracionRanking ? { configuracionRanking: data.configuracionRanking } : {}),
+    });
+  }
   return data;
 }
 

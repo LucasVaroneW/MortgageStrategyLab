@@ -25,8 +25,21 @@ class State {
     this.ofertasHipoteca = await db.getAll('ofertasHipoteca');
     this.prestamosPersonales = await db.getAll('prestamosPersonales');
     this.estrategias = await db.getAll('estrategias');
-    // Supuestos y configuración no se guardan en IndexedDB en esta versión (se exportan con JSON).
-    // En FASE 2 se podrían guardar en localStorage.
+    const config = await db.getConfiguracion();
+    this.supuestos = { ...supuestosPorDefecto(), ...(config?.supuestos || {}) };
+    this.configuracionRanking = { ...configuracionRankingPorDefecto(), ...(config?.configuracionRanking || {}) };
+    this.emit();
+  }
+
+  async setSupuestos(partial) {
+    this.supuestos = { ...this.supuestos, ...partial };
+    await db.setConfiguracion({ supuestos: this.supuestos });
+    this.emit();
+  }
+
+  async setConfiguracionRanking(partial) {
+    this.configuracionRanking = { ...this.configuracionRanking, ...partial };
+    await db.setConfiguracion({ configuracionRanking: this.configuracionRanking });
     this.emit();
   }
 

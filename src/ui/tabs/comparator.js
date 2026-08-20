@@ -193,6 +193,8 @@ function renderTAEMax() {
 
   const importeInp = el('input', { type: 'number', value: 10000, min: 0 });
   const plazoInp = el('input', { type: 'number', value: 84, min: 1 });
+  const comisionPctInp = el('input', { type: 'number', value: 0, min: 0, step: 0.1 });
+  const comisionFijaInp = el('input', { type: 'number', value: 0, min: 0 });
   const out = el('div', { id: 'tae-out' });
 
   const calc = () => {
@@ -215,6 +217,8 @@ function renderTAEMax() {
       nombre: 'Personal',
       importe: Number(importeInp.value) || 0,
       plazoMeses: Number(plazoInp.value) || 84,
+      comisionAperturaPct: Number(comisionPctInp.value) || 0,
+      comisionAperturaFija: Number(comisionFijaInp.value) || 0,
       tin: 7.5, tae: 7.5,
     };
     const resultado = calcularTAEMaximo({
@@ -255,16 +259,21 @@ function renderTAEMax() {
             el('div', {}, [formatEUR(resultado.costeReferencia)]),
           ]),
         ]),
+        resultado.tinMax !== undefined && resultado.tinMax !== resultado.taeMax
+          ? el('p', { class: 'text-muted small' }, [`TIN nominal equivalente: ${formatPct(resultado.tinMax)} (la TAE ya incorpora el efecto de la comisión de apertura).`])
+          : null,
         el('hr'),
-        el('h3', { style: { fontSize: '14px', color: 'var(--muted)' } }, ['Tabla de sensibilidad (coste total según TAE)']),
+        el('h3', { style: { fontSize: '14px', color: 'var(--muted)' } }, ['Tabla de sensibilidad (coste total según TIN, con su TAE real)']),
         el('table', {}, [
           el('thead', {}, [el('tr', {}, [
-            el('th', { class: 'num' }, ['TAE']),
+            el('th', { class: 'num' }, ['TIN']),
+            el('th', { class: 'num' }, ['TAE real']),
             el('th', { class: 'num' }, ['Coste total']),
             el('th', { class: 'num' }, ['Diferencia vs ref.']),
             el('th', {}, ['¿Compensa?']),
           ])]),
           el('tbody', {}, tabla.map(t => el('tr', {}, [
+            el('td', { class: 'num' }, [formatPct(t.tin)]),
             el('td', { class: 'num' }, [formatPct(t.tae)]),
             el('td', { class: 'num' }, [formatEUR(t.costeTotal)]),
             el('td', { class: 'num', style: { color: t.diferencia > 0 ? 'var(--bad)' : 'var(--good)' } }, [(t.diferencia > 0 ? '+' : '') + formatEUR(t.diferencia)]),
@@ -282,6 +291,8 @@ function renderTAEMax() {
       formRow({ label: 'Estrategia alternativa (con préstamo)', control: idAlt }),
       formRow({ label: 'Importe del préstamo personal', control: importeInp }),
       formRow({ label: 'Plazo del préstamo (meses)', control: plazoInp }),
+      formRow({ label: 'Comisión de apertura (%)', control: comisionPctInp, help: 'Sobre el importe. Sube la TAE real por encima del TIN.' }),
+      formRow({ label: 'Comisión de apertura (fija, €)', control: comisionFijaInp }),
     ]),
   );
   wrap.querySelector('.panel-body').appendChild(el('button', { class: 'btn', onClick: calc }, ['Calcular TAE máxima']));

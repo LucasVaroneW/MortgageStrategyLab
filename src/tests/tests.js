@@ -14,7 +14,7 @@ import { amortizarPrestamoPersonal } from '../finance/personalLoan.js';
 import { analizarEstrategia } from '../finance/strategy.js';
 import { resumenCosteInicial, costeInicialTotal } from '../finance/initialCost.js';
 import { encontrarEquilibrio } from '../finance/breakeven.js';
-import { calcularTAEMaximo } from '../finance/taeMax.js';
+import { calcularTAEMaximo, calcularTAEReal } from '../finance/taeMax.js';
 import { round2 } from '../core/money.js';
 
 const casiIgual = (a, b, tol = 0.01) => Math.abs(a - b) < tol;
@@ -419,6 +419,27 @@ export const tests = [
       return {
         ok: r.taeMax !== null && r.taeMax >= 0 && r.taeMax <= 50,
         detalles: { taeMax: r.taeMax, viable: r.viable, mensaje: r.mensaje },
+      };
+    },
+  },
+  {
+    nombre: 'calcularTAEReal: sin comisión, TAE queda muy cerca del TIN (solo capitalización mensual)',
+    ejecutar: () => {
+      // Sin comisiones la TAE sigue siendo ligeramente superior al TIN nominal, porque
+      // la TAE anualiza la capitalización mensual: (1+TIN/12/100)^12 - 1 > TIN.
+      const tin = 7.5;
+      const tae = calcularTAEReal({ importe: 10000, tin, meses: 60 });
+      return { ok: tae !== null && tae > tin && casiIgual(tae, tin, 0.5), detalles: { tin, tae } };
+    },
+  },
+  {
+    nombre: 'calcularTAEReal: con comisión de apertura, la TAE es mayor que el TIN',
+    ejecutar: () => {
+      const tin = 7.5;
+      const tae = calcularTAEReal({ importe: 10000, tin, meses: 60, comisionAperturaPct: 2 });
+      return {
+        ok: tae !== null && tae > tin,
+        detalles: { tin, tae },
       };
     },
   },

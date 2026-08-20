@@ -149,12 +149,13 @@ export function supuestosPorDefecto(overrides = {}) {
 
 export function configuracionRankingPorDefecto(overrides = {}) {
   return {
+    // Claves alineadas con rankingPersonalizado() en finance/rankings.js.
     pesos: {
       costeTotal: 30,
       liquidezInicial: 25,
-      cuota: 20,
+      cuotaInicial: 20,
       patrimonioFinal: 15,
-      riesgo: 10,
+      esfuerzoIngresos: 10,
     },
     filtros: {
       cuotaMax: null,

@@ -20,6 +20,9 @@ export function renderTabPerfil() {
   ]);
   root.appendChild(intro);
 
+  // Supuestos globales (afectan a Gráficos y Rankings: crecimiento de la vivienda, etc.)
+  root.appendChild(renderSupuestos());
+
   // Toolbar
   const toolbar = el('div', { class: 'toolbar' }, [
     el('button', {
@@ -49,6 +52,33 @@ export function renderTabPerfil() {
 
   refresh();
   return root;
+}
+
+function renderSupuestos() {
+  const s = state.supuestos;
+  const wrap = panel({
+    title: 'Supuestos globales',
+    subtitle: 'Hipótesis usadas en Gráficos y Rankings (patrimonio final, etc.). No son predicciones, solo el escenario que quieres simular.',
+  });
+  const fields = [
+    ['inflacionAnual', 'Inflación anual (%)'],
+    ['crecimientoVivienda', 'Crecimiento del valor de la vivienda (%/año)'],
+    ['crecimientoSalario', 'Crecimiento salarial general (%/año)'],
+    ['euriborProyectado', 'Euríbor proyectado (%)'],
+  ];
+  wrap.querySelector('.panel-body').appendChild(
+    el('div', { class: 'grid grid-4' }, fields.map(([key, label]) =>
+      formRow({
+        label,
+        control: inputNumber({
+          value: s[key],
+          step: 0.1,
+          onChange: v => state.setSupuestos({ [key]: v }),
+        }),
+      }),
+    )),
+  );
+  return wrap;
 }
 
 function renderLista(container, refresh) {

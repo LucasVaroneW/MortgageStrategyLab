@@ -76,6 +76,7 @@ export function renderTabRankings() {
     for (const k of Object.keys(inputs)) {
       pesos[k] = Number(inputs[k].value) || 0;
     }
+    state.setConfiguracionRanking({ pesos: { ...pesos } });
     renderPersonalizado(personalizado, rankings, pesos);
   }
   setTimeout(refresh, 0);
