@@ -98,16 +98,12 @@
   }
   .mode-btn.active { background: var(--accent); color: #1a1a1a; }
   nav.tabs {
-    display: flex; gap: 2px;
+    display: flex; flex-wrap: wrap; gap: 2px;
     padding: 10px 12px 0;
     border-bottom: 1px solid var(--border);
     background: var(--bg);
     position: sticky; top: 79px; z-index: 9;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
   }
-  nav.tabs::-webkit-scrollbar { display: none; }
   .tab-btn {
     background: none; border: none;
     color: var(--text-dim);
