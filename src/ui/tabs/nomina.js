@@ -7,7 +7,7 @@ import { el } from '../dom.js';
 // Sube este número cada vez que cambie nomina.html, para forzar a que el navegador
 // pida el archivo de nuevo en vez de servir una copia cacheada (GitHub Pages cachea
 // las respuestas hasta 10 minutos, y los navegadores pueden guardarlas más tiempo aún).
-const NOMINA_VERSION = 2;
+const NOMINA_VERSION = 3;
 
 export function renderTabNomina() {
   return el('div', { class: 'nomina-frame-wrap' }, [
