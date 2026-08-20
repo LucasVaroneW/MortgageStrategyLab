@@ -1,0 +1,23 @@
+# docker-compose.yml - Orquestacion simple
+# Uso:   docker compose up -d     (arrancar)
+#        docker compose down      (parar)
+#        docker compose logs -f   (ver logs)
+#
+# Despues de arrancar: abre http://localhost:8000/ en tu navegador.
+
+services:
+  mortgage-lab:
+    build: .
+    container_name: mortgage-strategy-lab
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistencia opcional de datos exportados dentro del contenedor.
+      - msl-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+
+volumes:
+  msl-data:

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests · Mortgage Strategy Lab</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .test-ok { background: rgba(16,185,129,0.08); border-left: 4px solid var(--good); }
+    .test-fail { background: rgba(239,68,68,0.08); border-left: 4px solid var(--bad); }
+    .test-name { font-weight: 600; }
+    .test-meta { color: var(--muted); font-size: 12px; }
+    pre { background: var(--bg); padding: 8px; border-radius: 4px; overflow: auto; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-title">
+      <h1>Tests · Mortgage Strategy Lab</h1>
+      <span class="app-subtitle">Verificación matemática del motor financiero</span>
+    </div>
+  </header>
+  <main id="main" style="max-width: 900px;">
+    <div id="summary" class="panel"></div>
+    <div id="results"></div>
+    <p style="margin-top:16px"><a href="index.html" class="btn btn-secondary">← Volver a la app</a></p>
+  </main>
+
+  <script type="module">
+    import { ejecutarTodos } from './src/tests/tests.js';
+
+    const main = document.getElementById('main');
+    const summary = document.getElementById('summary');
+    const results = document.getElementById('results');
+
+    summary.innerHTML = '<p>Ejecutando tests...</p>';
+
+    const r = await ejecutarTodos();
+
+    summary.innerHTML = `
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-value">${r.total}</div></div>
+        <div class="kpi"><div class="kpi-label">Pasados</div><div class="kpi-value text-good">${r.pasados}</div></div>
+        <div class="kpi"><div class="kpi-label">Fallados</div><div class="kpi-value ${r.fallados > 0 ? 'text-bad' : 'text-good'}">${r.fallados}</div></div>
+      </div>
+    `;
+
+    for (const t of r.resultados) {
+      const div = document.createElement('div');
+      div.className = 'list-item ' + (t.ok ? 'test-ok' : 'test-fail');
+      const detalles = Object.entries(t.detalles || {}).map(([k, v]) => `<div>· ${k} = ${typeof v === 'object' ? JSON.stringify(v) : v}</div>`).join('');
+      const errores = (t.errores || []).map(e => `<div class="text-bad">! ${e}</div>`).join('');
+      div.innerHTML = `
+        <div><span class="test-name">${t.ok ? '✅' : '❌'} ${t.nombre}</span></div>
+        <div class="test-meta">${t.tiempoMs} ms</div>
+        <div style="margin-top:6px">${detalles}${errores}</div>
+      `;
+      results.appendChild(div);
+    }
+  </script>
+</body>
+</html>

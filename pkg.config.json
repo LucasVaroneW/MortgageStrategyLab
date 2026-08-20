@@ -1,0 +1,21 @@
+{
+  "scripts": "server.cjs",
+  "targets": [
+    "node18-win-x64"
+  ],
+  "outputPath": "dist",
+  "assets": [
+    "index.html",
+    "tests.html",
+    "package.json",
+    "styles/**/*.css",
+    "styles/**/*.svg",
+    "assets/**/*.ico",
+    "assets/**/*.png",
+    "src/**/*.js",
+    "data/.gitkeep"
+  ],
+  "scriptsGlob": false,
+  "noBytecode": true,
+  "_comment": "El icono del .exe se aplica con postbuild-exe.mjs despues de pkg."
+}

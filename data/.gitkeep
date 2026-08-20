@@ -1,0 +1,4 @@
+# Este archivo preserva la carpeta data/ en el repo.
+# data/ contiene exports JSON de las hipotecas del usuario y esta
+# ignorada en .gitignore (ver seccion "Datos personales del usuario").
+# Las pruebas usan solo la logica del motor; los datos viven aqui.

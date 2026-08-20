@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>Mortgage Strategy Lab</title>
+  <link rel="icon" type="image/x-icon" href="assets/icon.ico">
+  <link rel="shortcut icon" href="assets/icon.ico">
+  <link rel="icon" type="image/svg+xml" href="styles/favicon.svg?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png?v=2">
+  <link rel="apple-touch-icon" sizes="128x128" href="assets/favicon-128.png?v=2">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-title">
+      <h1>Mortgage Strategy Lab</h1>
+      <span class="app-subtitle">Análisis comparativo de estrategias de financiación inmobiliaria</span>
+    </div>
+    <nav class="app-nav" id="tabs-nav">
+      <button class="tab-btn active" data-tab="dashboard">Resumen</button>
+      <button class="tab-btn" data-tab="perfil">Perfil</button>
+      <button class="tab-btn" data-tab="propiedades">Propiedades</button>
+      <button class="tab-btn" data-tab="hipotecas">Ofertas hipoteca</button>
+      <button class="tab-btn" data-tab="personales">Préstamos personales</button>
+      <button class="tab-btn" data-tab="estrategias">Estrategias</button>
+      <button class="tab-btn" data-tab="comparador">Comparador</button>
+      <button class="tab-btn" data-tab="graficos">Gráficos</button>
+      <button class="tab-btn" data-tab="rankings">Rankings</button>
+      <button class="tab-btn" data-tab="datos">Datos</button>
+    </nav>
+  </header>
+
+  <main id="app-main">
+    <!-- Las pestañas se inyectan aquí dinámicamente -->
+  </main>
+
+  <footer class="app-footer">
+    <span>Mortgage Strategy Lab · Funciona 100% local · Tus datos no salen del navegador</span>
+    <span id="db-status">Base de datos: …</span>
+  </footer>
+
+  <!-- Plantillas -->
+  <template id="tpl-alert">
+    <div class="alert">
+      <span class="alert-icon"></span>
+      <span class="alert-text"></span>
+    </div>
+  </template>
+
+  <script type="module" src="src/ui/app.js"></script>
+</body>
+</html>

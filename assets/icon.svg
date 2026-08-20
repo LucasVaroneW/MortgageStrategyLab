@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fondo redondeado con color principal de la app -->
+  <rect width="64" height="64" rx="12" fill="#0f172a"/>
+
+  <!-- Techo de la casa -->
+  <path d="M 12 30 L 32 14 L 52 30 L 48 30 L 48 50 L 16 50 L 16 30 Z"
+        fill="#38bdf8" stroke="#0ea5e9" stroke-width="1" stroke-linejoin="round"/>
+
+  <!-- Puerta -->
+  <rect x="28" y="38" width="8" height="12" fill="#0f172a"/>
+
+  <!-- Ventana izquierda -->
+  <rect x="19" y="34" width="6" height="6" fill="#0f172a"/>
+  <!-- Ventana derecha -->
+  <rect x="39" y="34" width="6" height="6" fill="#0f172a"/>
+
+  <!-- Línea de tendencia ascendente (gráfico) - superpuesta -->
+  <polyline points="6,58 18,52 28,54 38,48 50,42 58,38"
+            fill="none" stroke="#10b981" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Punto final destacado -->
+  <circle cx="58" cy="38" r="2.5" fill="#10b981"/>
+</svg>

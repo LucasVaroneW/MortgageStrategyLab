@@ -1,0 +1,28 @@
+{
+  "name": "mortgage-strategy-lab",
+  "version": "0.1.0",
+  "description": "Analisis local y comparativo de estrategias de financiacion inmobiliaria.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "mortgage-strategy-lab": "./server.cjs"
+  },
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node src/tests/run-tests.mjs",
+    "test:browser": "echo Abre tests.html en tu navegador",
+    "build:icons": "node build-icons.mjs",
+    "build:exe": "node build-exe.mjs",
+    "build:exe:all": "node build-exe.mjs --all",
+    "build:all": "node build-icons.mjs && node build-exe.mjs",
+    "docker:build": "docker build -t mortgage-lab .",
+    "docker:run": "docker run -d --name msl -p 8000:8000 mortgage-lab",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1",
+    "resedit-cli": "^3.1.0",
+    "sharp": "^0.35.3"
+  }
+}
