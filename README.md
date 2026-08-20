@@ -28,6 +28,12 @@ DOCS.md incluye:
   - Añadir nuevos campos, métricas o pestañas.
 - Convenciones de código y glosario financiero.
 
+También incluye la pestaña **Nómina** (reparto de sueldo, gastos
+compartidos y pasos bancarios mensuales), una mini-app aparte con su
+propio almacenamiento. Ver **[nomina/DOCS.md](./nomina/DOCS.md)** para el
+formato del JSON de importación/exportación — útil si le pedís a una IA
+que te genere ese JSON a partir de tus datos reales.
+
 ## Filosofía del software
 
 - **Datos introducidos** / **cálculos** / **estimaciones** / **supuestos**: siempre separados y etiquetados.

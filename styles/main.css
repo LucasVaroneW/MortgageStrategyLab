@@ -1,6 +1,7 @@
 /* Mortgage Strategy Lab - estilos
    Paleta y tipografía compartidas con la app de Nómina para una experiencia unificada. */
 :root {
+  color-scheme: dark;
   --bg: #0a0a0a;
   --panel: #141414;
   --panel-2: #1a1a1a;
