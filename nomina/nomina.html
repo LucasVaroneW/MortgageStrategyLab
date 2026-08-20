@@ -520,6 +520,8 @@
 </head>
 <body data-mode="a">
 
+<div id="fatalErrorBanner" style="display:none; position:sticky; top:0; z-index:999; background:#5a1010; color:#ffdede; padding:10px 14px; font-family:monospace; font-size:12px; white-space:pre-wrap; border-bottom:2px solid #d97a7a;"></div>
+
 <header>
   <div class="title-block">
     <h1>Nómina</h1>
@@ -720,9 +722,24 @@
   <button class="add-btn" id="importarTextareaBtn" style="margin-top: 8px;">Cargar desde texto</button>
 </section>
 
-<footer>v1 · datos guardados en este dispositivo</footer>
+<footer id="appFooter">v4 · cargando...</footer>
 
 <script>
+// Cualquier error de JS en esta página, aunque sea en un solo botón, se muestra
+// aquí arriba en texto plano. Así no hace falta abrir la consola para diagnosticar.
+window.addEventListener('error', (ev) => {
+  const banner = document.getElementById('fatalErrorBanner');
+  if (!banner) return;
+  banner.style.display = 'block';
+  banner.textContent += `[JS ERROR] ${ev.message} (línea ${ev.lineno}:${ev.colno})\n`;
+});
+window.addEventListener('unhandledrejection', (ev) => {
+  const banner = document.getElementById('fatalErrorBanner');
+  if (!banner) return;
+  banner.style.display = 'block';
+  banner.textContent += `[PROMISE ERROR] ${ev.reason}\n`;
+});
+
 // =============== DEFAULTS ===============
 // Sin datos personales: plantilla en blanco, cada quien carga lo suyo la primera vez.
 const DEFAULT_PROPIOS_A = [];
@@ -1659,6 +1676,8 @@ function renderAll() {
   renderBanks();
   renderBanksConfig();
   renderStepsEditor();
+  const footer = document.getElementById('appFooter');
+  if (footer) footer.textContent = 'v4 · listo · datos guardados en este dispositivo';
 }
 
 renderAll();
