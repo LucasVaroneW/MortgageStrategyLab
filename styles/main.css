@@ -33,6 +33,14 @@ html, body {
   box-shadow: var(--shadow);
 }
 
+.app-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .app-title h1 {
   margin: 0;
   font-size: 22px;
@@ -42,6 +50,52 @@ html, body {
 .app-subtitle {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Indicador de backup */
+.backup-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.backup-indicator.recent {
+  border-color: var(--good);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.backup-indicator.old {
+  border-color: var(--warn);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.backup-indicator.never {
+  border-color: var(--bad);
+  background: rgba(239, 68, 68, 0.12);
+  animation: pulse-warn 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warn {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+
+.backup-status {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.backup-indicator.recent .backup-status { color: var(--good); }
+.backup-indicator.old .backup-status   { color: var(--warn); }
+.backup-indicator.never .backup-status  { color: var(--bad); font-weight: 600; }
+
+#backup-now-btn {
+  white-space: nowrap;
 }
 
 .app-nav {

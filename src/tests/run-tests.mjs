@@ -1,15 +1,27 @@
 // Runner de tests para Node.js (CLI).
 // Uso: node src/tests/run-tests.mjs
 
+// Mock localStorage para que los tests del modulo de backup funcionen en Node.
+const _ls = new Map();
+globalThis.localStorage = {
+  getItem: k => (_ls.has(k) ? _ls.get(k) : null),
+  setItem: (k, v) => _ls.set(k, String(v)),
+  removeItem: k => _ls.delete(k),
+  clear: () => _ls.clear(),
+  key: i => [..._ls.keys()][i] || null,
+  get length() { return _ls.size; },
+};
+
 import { ejecutarTodos } from './tests.js';
 import { ejecutarTodosIntegracion } from './integrationTests.js';
 import { testsGraficosRankings } from './graficosRankingsTests.js';
+import { testsBackup } from './backupTests.js';
 
 const integ = await ejecutarTodosIntegracion();
 
-async function ejecutarGraficosRankings() {
+async function ejecutarArray(testsArray) {
   const resultados = [];
-  for (const t of testsGraficosRankings) {
+  for (const t of testsArray) {
     const t0 = Date.now();
     try {
       const r = await Promise.resolve(t.ejecutar());
@@ -27,8 +39,9 @@ async function ejecutarGraficosRankings() {
   return resultados;
 }
 
-const gr = await ejecutarGraficosRankings();
-const resultados = [...integ.resultados, ...gr];
+const gr = await ejecutarArray(testsGraficosRankings);
+const bk = await ejecutarArray(testsBackup);
+const resultados = [...integ.resultados, ...gr, ...bk];
 const total = resultados.length;
 const pasados = resultados.filter(x => x.ok).length;
 const fallados = total - pasados;

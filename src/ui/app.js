@@ -13,6 +13,7 @@ import { renderTabDashboard } from './tabs/dashboard.js';
 import { renderTabGraficos } from './tabs/graficos.js';
 import { renderTabRankings } from './tabs/rankings.js';
 import { abrirDB } from '../storage/db.js';
+import { descargarBackup, iniciarAutoBackup, onBackupChange, textoIndicadorBackup } from '../storage/backup.js';
 import { el } from './dom.js';
 
 const TABS = {
@@ -43,6 +44,9 @@ async function init() {
     console.error(e);
   }
 
+  setupBackupUI();
+  iniciarAutoBackup();
+
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       activeTab = btn.dataset.tab;
@@ -53,10 +57,35 @@ async function init() {
   mountTabs();
 
   state.subscribe(() => {
-    if (activeTab === 'dashboard' || activeTab === 'comparador') {
+    if (activeTab === 'dashboard' || activeTab === 'comparador' || activeTab === 'graficos' || activeTab === 'rankings') {
       mountTabs();
     }
   });
+}
+
+// ─────────────────────────────────────────────
+//   Indicador y botón de backup
+// ─────────────────────────────────────────────
+
+function setupBackupUI() {
+  const indicator = document.getElementById('backup-indicator');
+  const status = document.getElementById('backup-status');
+  const btn = document.getElementById('backup-now-btn');
+  if (!indicator || !status || !btn) return;
+
+  // Boton: descarga inmediata.
+  btn.addEventListener('click', () => descargarBackup({ silencioso: false }));
+
+  // Refrescar indicador periodicamente y cuando cambie el estado del backup.
+  function refrescar() {
+    const info = textoIndicadorBackup();
+    status.textContent = info.texto;
+    indicator.classList.remove('recent', 'old', 'never');
+    indicator.classList.add(info.nivel);
+  }
+  refrescar();
+  setInterval(refrescar, 30 * 1000); // cada 30s
+  onBackupChange(refrescar);
 }
 
 function mountTabs() {

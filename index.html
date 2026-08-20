@@ -15,9 +15,17 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="app-title">
-      <h1>Mortgage Strategy Lab</h1>
-      <span class="app-subtitle">Análisis comparativo de estrategias de financiación inmobiliaria</span>
+    <div class="app-header-top">
+      <div class="app-title">
+        <h1>Mortgage Strategy Lab</h1>
+        <span class="app-subtitle">Análisis comparativo de estrategias de financiación inmobiliaria</span>
+      </div>
+      <div class="backup-indicator recent" id="backup-indicator" title="Tus datos se guardan automáticamente en este navegador. Haz backups periódicamente para no perderlos.">
+        <span class="backup-status" id="backup-status">Último backup: …</span>
+        <button class="btn btn-small btn-secondary" id="backup-now-btn" title="Descarga un archivo .json con todos tus datos. Guardalo en Drive, USB o donde quieras.">
+          💾 Hacer backup ahora
+        </button>
+      </div>
     </div>
     <nav class="app-nav" id="tabs-nav">
       <button class="tab-btn active" data-tab="dashboard">Resumen</button>
