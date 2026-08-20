@@ -710,6 +710,7 @@
   </div>
   <input type="file" id="importarDatosInput" accept="application/json" style="display:none;">
   <button class="add-btn" id="importarDatosBtn">⬆ Importar desde JSON</button>
+  <div id="datosStatus" style="margin-top: 12px; font-size: 12.5px; font-family: var(--font-mono); min-height: 18px;"></div>
 </section>
 
 <footer>v1 · datos guardados en este dispositivo</footer>
@@ -822,6 +823,7 @@ reloadState();
 // Formato: { version:1, exportedAt, shared:{sueldoA,sueldoB,conceptos,comidaConceptoId},
 //            a:{...campos de snapshotModo('a')...}, b:{...campos de snapshotModo('b')...} }
 function exportarDatos() {
+  const status = document.getElementById('datosStatus');
   const data = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -843,6 +845,10 @@ function exportarDatos() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+  if (status) {
+    status.textContent = '✓ Exportado (' + new Date().toLocaleTimeString('es-ES') + '). Revisa la carpeta de descargas.';
+    status.style.color = 'var(--green)';
+  }
 }
 
 function importarDatos(data) {
@@ -1592,16 +1598,27 @@ document.getElementById('importarDatosBtn').addEventListener('click', () => {
 });
 
 document.getElementById('importarDatosInput').addEventListener('change', (e) => {
+  const status = document.getElementById('datosStatus');
   const file = e.target.files[0];
   if (!file) return;
+  status.textContent = `Leyendo ${file.name}...`;
+  status.style.color = 'var(--text-dim)';
   const reader = new FileReader();
+  reader.onerror = () => {
+    status.textContent = 'Error: no se pudo leer el archivo (' + (reader.error?.message || reader.error) + ').';
+    status.style.color = 'var(--red)';
+    console.error('Error leyendo archivo de importación', reader.error);
+  };
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
       importarDatos(data);
-      alert('Datos importados correctamente.');
+      status.textContent = '✓ Datos importados correctamente (' + new Date().toLocaleTimeString('es-ES') + ').';
+      status.style.color = 'var(--green)';
     } catch (err) {
-      alert('Error al importar: ' + err.message);
+      status.textContent = 'Error al importar: ' + err.message;
+      status.style.color = 'var(--red)';
+      console.error('Error al importar JSON', err);
     }
   };
   reader.readAsText(file);
