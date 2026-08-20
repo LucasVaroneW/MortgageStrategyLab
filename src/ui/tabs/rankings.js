@@ -101,7 +101,7 @@ function renderTabla(list, key) {
       el('th', { class: 'num' }, ['#']),
       el('th', {}, ['Estrategia']),
       el('th', {}, ['Banco / Producto']),
-      el('th', { class: 'num' }, formatea(key)],
+      el('th', { class: 'num' }, formatea(key)),
     ])]),
     el('tbody', {}, list.map(r => el('tr', {}, [
       el('td', { class: 'num' }, [medalla(r.ranking)]),

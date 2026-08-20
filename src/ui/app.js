@@ -12,6 +12,7 @@ import { renderTabDatos } from './tabs/dataIO.js';
 import { renderTabDashboard } from './tabs/dashboard.js';
 import { renderTabGraficos } from './tabs/graficos.js';
 import { renderTabRankings } from './tabs/rankings.js';
+import { renderTabNomina } from './tabs/nomina.js';
 import { abrirDB } from '../storage/db.js';
 import { descargarBackup, iniciarAutoBackup, onBackupChange, textoIndicadorBackup } from '../storage/backup.js';
 import { el } from './dom.js';
@@ -26,6 +27,7 @@ const TABS = {
   comparador: { label: 'Comparador', render: renderTabComparador },
   graficos: { label: 'Gráficos', render: renderTabGraficos },
   rankings: { label: 'Rankings', render: renderTabRankings },
+  nomina: { label: 'Nómina', render: renderTabNomina },
   datos: { label: 'Datos', render: renderTabDatos },
 };
 

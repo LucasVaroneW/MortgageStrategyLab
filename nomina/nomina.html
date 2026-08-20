@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nómina">
+<meta name="theme-color" content="#0a0a0a">
+<title>Nómina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-elevated: #141414;
+    --bg-card: #1a1a1a;
+    --border: #262626;
+    --border-strong: #333;
+    --text: #ededed;
+    --text-dim: #8a8a8a;
+    --text-faint: #555;
+    --accent: #7aa8d9;
+    --accent-dim: #4e6f8b;
+    --green: #7cb87c;
+    --red: #d97a7a;
+    --blue: #7aa8d9;
+    --purple: #b48ad9;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  [data-mode="b"] {
+    --accent: #c989b4;
+    --accent-dim: #8a5e7a;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: contain;
+  }
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 80px) env(safe-area-inset-left);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  header {
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  header .title-block h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+  header .title-block .subtitle {
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  .mode-switch {
+    display: flex;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .mode-btn {
+    background: none; border: none;
+    color: var(--text-dim);
+    font-family: var(--font-body);
+    font-size: 12px; font-weight: 600;
+    padding: 6px 12px; border-radius: 7px;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .mode-btn.active { background: var(--accent); color: #1a1a1a; }
+  nav.tabs {
+    display: flex; gap: 2px;
+    padding: 10px 12px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 79px; z-index: 9;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none;
+    color: var(--text-dim);
+    font-family: var(--font-body);
+    font-size: 12.5px; font-weight: 500;
+    padding: 11px 10px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer; transition: color 0.2s, border-color 0.2s;
+    letter-spacing: 0.01em;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  section { padding: 18px 14px; display: none; }
+  section.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .net-salary {
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .net-salary label {
+    display: block; color: var(--text-dim);
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 4px;
+  }
+  .net-salary .input-row { display: flex; align-items: baseline; gap: 8px; }
+  .net-salary input {
+    background: none; border: none; color: var(--text);
+    font-family: var(--font-display); font-weight: 500;
+    font-size: 34px; width: 100%; padding: 0; outline: none;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+  .net-salary .currency {
+    font-family: var(--font-display);
+    font-size: 20px; color: var(--text-dim); font-weight: 400;
+  }
+  .ocio-card {
+    background: linear-gradient(135deg, rgba(122, 168, 217, 0.12) 0%, rgba(122, 168, 217, 0.04) 100%);
+    border: 1px solid var(--accent-dim);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+    position: relative; overflow: hidden;
+  }
+  [data-mode="b"] .ocio-card {
+    background: linear-gradient(135deg, rgba(201, 137, 180, 0.12) 0%, rgba(201, 137, 180, 0.04) 100%);
+  }
+  .ocio-card::before {
+    content: ''; position: absolute;
+    top: -50%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(122, 168, 217, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .ocio-card .label {
+    color: var(--accent);
+    font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 3px;
+    font-weight: 600;
+  }
+  .ocio-card .amount {
+    font-family: var(--font-display);
+    font-size: 38px; font-weight: 500;
+    letter-spacing: -0.02em; color: var(--text);
+    line-height: 1.1;
+    font-variation-settings: "opsz" 144;
+  }
+  .ocio-card .amount .currency { font-size: 20px; color: var(--text-dim); margin-left: 4px; }
+  .ocio-card .breakdown {
+    color: var(--text-dim); font-size: 11.5px;
+    margin-top: 6px; font-family: var(--font-mono);
+    line-height: 1.4;
+  }
+  .ocio-card.negative {
+    background: linear-gradient(135deg, rgba(217, 122, 122, 0.12) 0%, rgba(217, 122, 122, 0.04) 100%);
+    border-color: var(--red);
+  }
+  .ocio-card.negative .label { color: var(--red); }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--text-dim);
+    margin: 24px 4px 10px; font-weight: 600;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .row-group {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .row {
+    display: flex; align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px; min-height: 48px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row.total { background: var(--bg-card); font-weight: 600; }
+  .row .name { flex: 1; font-size: 14.5px; color: var(--text); min-width: 0; }
+  .row .name .sub {
+    display: block; color: var(--text-faint);
+    font-size: 11px; margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+  .row .name input {
+    background: none; border: none; color: var(--text);
+    font-family: var(--font-body); font-size: 14.5px;
+    width: 100%; padding: 0; outline: none;
+  }
+  .row .amount-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font-mono); font-size: 13.5px;
+    width: 88px; text-align: right;
+    padding: 6px 10px; outline: none;
+    transition: border-color 0.15s; flex-shrink: 0;
+  }
+  .row .amount-input:focus { border-color: var(--accent); }
+  .row .amount-display {
+    font-family: var(--font-mono); font-size: 13.5px;
+    color: var(--text); text-align: right;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px;
+    width: 88px; flex-shrink: 0;
+  }
+  .row.total .amount-display {
+    color: var(--accent); font-weight: 600;
+    border-color: var(--accent-dim);
+    background: rgba(122, 168, 217, 0.08);
+  }
+  [data-mode="b"] .row.total .amount-display { background: rgba(201, 137, 180, 0.08); }
+  .row .delete-btn {
+    background: none; border: none;
+    color: var(--text-faint); font-size: 18px;
+    padding: 4px 6px; cursor: pointer;
+    border-radius: 6px; transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .row .delete-btn:active { color: var(--red); background: rgba(217, 122, 122, 0.1); }
+  .add-btn {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-dim);
+    font-family: var(--font-body); font-size: 13.5px;
+    padding: 13px; border-radius: 12px;
+    margin-top: 10px; cursor: pointer;
+    transition: all 0.15s; font-weight: 500;
+  }
+  .add-btn:active { background: var(--bg-card); border-color: var(--accent); color: var(--accent); }
+  .summary-bar {
+    display: flex; height: 10px;
+    border-radius: 6px; overflow: hidden;
+    margin: 10px 0 16px;
+    background: var(--bg-card);
+  }
+  .summary-bar .seg { height: 100%; transition: width 0.3s ease; }
+  .legend {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px 10px; margin-bottom: 16px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-dim); }
+  .legend-item .dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+  .legend-item .val { font-family: var(--font-mono); color: var(--text); margin-left: auto; }
+  .proportion-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .proportion-card .pct {
+    font-family: var(--font-mono);
+    color: var(--accent); font-weight: 600;
+    font-size: 13.5px;
+  }
+  .steps-intro {
+    color: var(--text-dim); font-size: 13.5px;
+    margin-bottom: 18px; line-height: 1.55;
+  }
+  .step {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 14px 14px 12px;
+    margin-bottom: 9px;
+    display: flex; gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .step:active { transform: scale(0.99); }
+  .step.done { opacity: 0.55; background: var(--bg-card); }
+  .step.done .step-text { text-decoration: line-through; text-decoration-color: var(--text-faint); }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 12.5px; font-weight: 600;
+    color: var(--accent);
+    transition: all 0.2s;
+  }
+  .step.done .step-num { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+  .step.done .step-num::after { content: '✓'; }
+  .step.done .step-num span { display: none; }
+  .step-text { flex: 1; font-size: 14px; line-height: 1.45; padding-top: 2px; }
+  .step-amount {
+    color: var(--accent); font-family: var(--font-mono);
+    font-size: 12.5px; font-weight: 600;
+    margin-left: 5px; white-space: nowrap;
+  }
+  .bank-tag {
+    display: inline-block;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    font-size: 10.5px; padding: 2px 7px;
+    border-radius: 5px; margin: 0 2px;
+    font-weight: 500; letter-spacing: 0.02em;
+    white-space: nowrap; text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+  .step-detail {
+    color: var(--text-faint); font-size: 11.5px;
+    margin-top: 4px; font-family: var(--font-mono);
+    line-height: 1.45;
+  }
+  .step-flow {
+    color: var(--text-faint); font-size: 11px;
+    margin-top: 6px; font-family: var(--font-mono);
+    display: flex; align-items: center;
+    gap: 6px; flex-wrap: wrap;
+  }
+  .reset-btn {
+    width: 100%; background: none;
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    font-family: var(--font-body); font-size: 13px;
+    padding: 12px; border-radius: 10px;
+    margin-top: 10px; cursor: pointer;
+    font-weight: 500;
+  }
+  .reset-btn:active { background: var(--bg-elevated); color: var(--text); }
+  .reset-btn.primary { border-color: var(--accent-dim); color: var(--accent); }
+  .bank-row {
+    display: flex; align-items: center;
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px; min-height: 56px;
+  }
+  .bank-row:last-child { border-bottom: none; }
+  .bank-info { flex: 1; min-width: 0; }
+  .bank-info .bank-name {
+    font-size: 14.5px; color: var(--text);
+    font-weight: 500; letter-spacing: 0.01em;
+  }
+  .bank-info .bank-role {
+    color: var(--text-faint); font-size: 11px;
+    margin-top: 2px; font-family: var(--font-mono);
+  }
+  .extra-intro {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 15px;
+    margin-bottom: 14px;
+    color: var(--text-dim);
+    font-size: 12.5px; line-height: 1.5;
+  }
+  .extra-intro strong { color: var(--accent); }
+  .extra-intro code {
+    background: var(--bg-card);
+    padding: 1px 5px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent);
+  }
+  footer {
+    text-align: center; color: var(--text-faint);
+    font-size: 10.5px; padding: 18px;
+    font-family: var(--font-mono);
+  }
+
+  /* Editor de pasos */
+  .edit-step {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .edit-step-header {
+    display: flex; align-items: center;
+    gap: 10px; margin-bottom: 12px;
+  }
+  .edit-step-header .num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 12.5px; font-weight: 600;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .edit-step-header input {
+    flex: 1; background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font-body); font-size: 14px;
+    padding: 7px 10px; outline: none;
+  }
+  .edit-field {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 8px;
+  }
+  .edit-field label {
+    flex-shrink: 0;
+    width: 70px; font-size: 11.5px;
+    color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .edit-field select, .edit-field .formula-pills {
+    flex: 1;
+  }
+  .edit-field select {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font-body); font-size: 13px;
+    padding: 7px 10px; outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8a8a' d='M6 9L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .formula-pills {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .pill.active {
+    background: rgba(122, 168, 217, 0.15);
+    border-color: var(--accent-dim);
+    color: var(--accent);
+  }
+  .pill-remove {
+    background: none; border: none;
+    color: inherit; font-size: 12px;
+    padding: 0; cursor: pointer;
+    margin-left: 2px;
+  }
+  .pill-add-select {
+    background: var(--bg-card);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    outline: none;
+  }
+  .edit-step-actions {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .edit-step-actions button {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    font-family: var(--font-body); font-size: 12px;
+    padding: 6px 10px; border-radius: 6px;
+    cursor: pointer; flex: 1;
+  }
+  .edit-step-actions button.danger:active {
+    color: var(--red); border-color: var(--red);
+  }
+  .formula-preview {
+    color: var(--text-faint);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body data-mode="a">
+
+<header>
+  <div class="title-block">
+    <h1>Nómina</h1>
+    <div class="subtitle" id="modeSubtitle">Modo A</div>
+  </div>
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode-btn="a">Persona A</button>
+    <button class="mode-btn" data-mode-btn="b">Persona B</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="desglose">Desglose</button>
+  <button class="tab-btn" data-tab="compartidos">Compartidos</button>
+  <button class="tab-btn" data-tab="propios">Propios</button>
+  <button class="tab-btn" data-tab="extra">Extras</button>
+  <button class="tab-btn" data-tab="pasos">Pasos</button>
+  <button class="tab-btn" data-tab="bancos">Bancos</button>
+  <button class="tab-btn" data-tab="config">Config</button>
+</nav>
+
+<section id="desglose" class="active">
+  <div class="net-salary">
+    <label>Nómina neta</label>
+    <div class="input-row">
+      <input type="number" id="nomina" inputmode="decimal">
+      <span class="currency">€</span>
+    </div>
+  </div>
+
+  <div class="ocio-card" id="ocioCard">
+    <div class="label">Ocio disponible</div>
+    <div class="amount"><span id="ocioVal">0</span><span class="currency">€</span></div>
+    <div class="breakdown" id="ocioBreakdown"></div>
+  </div>
+
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="legend" id="legend"></div>
+
+  <div class="section-title">Reparto fijo</div>
+  <div class="row-group" id="desgloseRows"></div>
+</section>
+
+<section id="compartidos">
+  <div class="extra-intro">
+    Cálculo proporcional según sueldos. Los importes se <strong>redondean al entero</strong> manteniendo la suma exacta.
+  </div>
+
+  <div class="section-title">Sueldos</div>
+  <div class="row-group">
+    <div class="row">
+      <div class="name">Persona A</div>
+      <input type="number" class="amount-input" id="sueldoA" inputmode="decimal">
+    </div>
+    <div class="row">
+      <div class="name">Persona B</div>
+      <input type="number" class="amount-input" id="sueldoB" inputmode="decimal">
+    </div>
+    <div class="row total">
+      <div class="name">Total ingresos</div>
+      <div class="amount-display"><span id="totalIngresos">0</span></div>
+    </div>
+  </div>
+
+  <div class="proportion-card">
+    <span>% Persona A</span>
+    <span class="pct" id="pctA">0%</span>
+  </div>
+  <div class="proportion-card">
+    <span>% Persona B</span>
+    <span class="pct" id="pctB">0%</span>
+  </div>
+
+  <div class="section-title">Conceptos compartidos</div>
+  <div class="row-group" id="conceptosList"></div>
+  <button class="add-btn" id="addConcepto">+ Añadir concepto compartido</button>
+
+  <div class="section-title" style="margin-top: 28px;">Reparto resultante</div>
+  <div class="row-group">
+    <div class="row total">
+      <div class="name">Total compartidos</div>
+      <div class="amount-display"><span id="totalCompartidos">0</span></div>
+    </div>
+    <div class="row">
+      <div class="name">Aporta A <span class="sub" id="pctAInline">0%</span></div>
+      <div class="amount-display"><span id="aportaA">0</span></div>
+    </div>
+    <div class="row">
+      <div class="name">Aporta B <span class="sub" id="pctBInline">0%</span></div>
+      <div class="amount-display"><span id="aportaB">0</span></div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top: 28px;">Compra de comida</div>
+  <div class="row-group">
+    <div class="row">
+      <div class="name">Importe compra mensual
+        <span class="sub">gasto de supermercado del mes</span>
+      </div>
+      <input type="number" class="amount-input" id="compraComida" inputmode="decimal">
+    </div>
+    <div class="row">
+      <div class="name">Concepto "Comida" en compartidos
+        <span class="sub">selecciona cuál de los conceptos es la comida</span>
+      </div>
+      <select id="comidaConcepto" style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); font-family: var(--font-body); font-size: 13px; padding: 7px 10px; outline: none; appearance: none; -webkit-appearance: none; min-width: 110px;"></select>
+    </div>
+  </div>
+</section>
+
+<section id="propios">
+  <div class="section-title">Gastos propios mensuales</div>
+  <div class="row-group" id="propiosList"></div>
+  <button class="add-btn" id="addPropio">+ Añadir gasto propio</button>
+  <div class="section-title" style="margin-top: 28px;">Total</div>
+  <div class="row-group">
+    <div class="row total">
+      <div class="name">Suma gastos propios</div>
+      <div class="amount-display"><span id="propiosTotal2">0</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="extra">
+  <div class="extra-intro">
+    Gastos <strong>puntuales</strong> de este mes (cumpleaños, regalo, ropa…). Se descuentan del <strong>ocio</strong> automáticamente.
+  </div>
+  <div class="section-title">Gastos extra de este mes</div>
+  <div class="row-group" id="extraList"></div>
+  <button class="add-btn" id="addExtra">+ Añadir gasto extra</button>
+  <div class="section-title" style="margin-top: 28px;">Total extras</div>
+  <div class="row-group">
+    <div class="row total">
+      <div class="name">Suma gastos extra</div>
+      <div class="amount-display"><span id="extraTotal">0</span></div>
+    </div>
+  </div>
+  <button class="reset-btn" id="resetExtra">Vaciar extras del mes</button>
+</section>
+
+<section id="pasos">
+  <p class="steps-intro">Marca cada paso al ejecutarlo. Los saldos de bancos se actualizan automáticamente.</p>
+  <div id="stepsList"></div>
+  <button class="reset-btn" id="resetSteps">Reiniciar pasos del mes</button>
+</section>
+
+<section id="bancos">
+  <div class="extra-intro">
+    Saldos de memoria. Editables a mano. Se actualizan al marcar los pasos.
+  </div>
+  <div class="section-title">Saldos actuales</div>
+  <div class="row-group" id="banksList"></div>
+  <button class="reset-btn primary" id="receiveSalary">Acabo de cobrar la nómina</button>
+  <button class="reset-btn" id="resetBanks">Resetear saldos a 0</button>
+</section>
+
+<section id="config">
+  <div class="extra-intro">
+    Configura las <strong>cuentas</strong> y los <strong>pasos</strong> de este modo. Cada modo (A/B) tiene su propia lista de pasos.
+  </div>
+
+  <div class="section-title">Cuentas</div>
+  <div class="row-group" id="banksConfigList"></div>
+  <button class="add-btn" id="addBank">+ Añadir cuenta</button>
+
+  <div class="section-title" style="margin-top: 28px;">Pasos del modo <span id="configModeName" style="color: var(--accent);">A</span></div>
+  <div id="stepsEditor"></div>
+  <button class="add-btn" id="addStep">+ Añadir paso</button>
+
+  <div class="section-title" style="margin-top: 28px;">Variables disponibles</div>
+  <div class="extra-intro" style="font-size: 11.5px;">
+    <code>nomina</code> · <code>ocio</code> · <code>acciones</code> · <code>propios</code> · <code>ingles</code> · <code>ahorro</code> · <code>viajesFijo</code> · <code>viajesTotal</code> · <code>miAporteCompartidos</code> · <code>miAporteSinComida</code> · <code>comidaCompra</code> · <code>psicologo</code> · <code>youtube</code>
+    <br><br>La fórmula es <strong>suma de variables</strong>. Si necesitas restar (como "compartidos − comida"), usa la variable <code>miAporteSinComida</code>.
+  </div>
+</section>
+
+<footer>v1 · datos guardados en este dispositivo</footer>
+
+<script>
+// =============== DEFAULTS ===============
+// Sin datos personales: plantilla en blanco, cada quien carga lo suyo la primera vez.
+const DEFAULT_PROPIOS_A = [];
+const DEFAULT_PROPIOS_B = [];
+
+const DEFAULT_CONCEPTOS = [
+  { id: 'alquiler', name: 'Alquiler', amount: 0 },
+  { id: 'comida', name: 'Comida', amount: 0 },
+];
+
+const DEFAULT_BANKS_A = [
+  { id: 'principal', name: 'Cuenta principal', role: 'cobro nómina' },
+];
+
+const DEFAULT_BANKS_B = [
+  { id: 'principal', name: 'Cuenta principal', role: 'cobro nómina' },
+];
+
+const DEFAULT_STEPS_A = [];
+const DEFAULT_STEPS_B = [];
+
+const FORMULA_VARS = [
+  { id: 'nomina', label: 'Nómina' },
+  { id: 'ocio', label: 'Ocio' },
+  { id: 'acciones', label: 'Acciones' },
+  { id: 'propios', label: 'Propios (total)' },
+  { id: 'ingles', label: 'Inglés' },
+  { id: 'ahorro', label: 'Ahorro' },
+  { id: 'viajesFijo', label: 'Aporte viajes' },
+  { id: 'viajesTotal', label: 'Viajes total' },
+  { id: 'miAporteCompartidos', label: 'Mi aporte compartidos' },
+  { id: 'miAporteSinComida', label: 'Mi aporte sin comida' },
+  { id: 'comidaCompra', label: 'Compra comida' },
+  { id: 'psicologo', label: 'Psicólogo' },
+  { id: 'youtube', label: 'YouTube' },
+];
+
+// =============== STATE ===============
+let mode = localStorage.getItem('nom_mode') || 'a';
+
+function k(key) { return `nom_${mode}_${key}`; }
+function load(key, fallback) {
+  try {
+    const v = localStorage.getItem(k(key));
+    return v === null ? fallback : JSON.parse(v);
+  } catch { return fallback; }
+}
+function save(key, val) {
+  try { localStorage.setItem(k(key), JSON.stringify(val)); } catch {}
+}
+function loadShared(key, fallback) {
+  try {
+    const v = localStorage.getItem(`nom_shared_${key}`);
+    return v === null ? fallback : JSON.parse(v);
+  } catch { return fallback; }
+}
+function saveShared(key, val) {
+  try { localStorage.setItem(`nom_shared_${key}`, JSON.stringify(val)); } catch {}
+}
+
+let state = {};
+
+function reloadState() {
+  const defaultBanks = mode === 'a' ? DEFAULT_BANKS_A : DEFAULT_BANKS_B;
+  const defaultSteps = mode === 'a' ? DEFAULT_STEPS_A : DEFAULT_STEPS_B;
+  const defaultPropios = mode === 'a' ? DEFAULT_PROPIOS_A : DEFAULT_PROPIOS_B;
+  state = {
+    nomina: load('nomina', 0),
+    ingles: load('ingles', 0),
+    acciones: load('acciones', 0),
+    ahorro: load('ahorro', 0),
+    viajesFijo: load('viajesFijo', 0),
+    compraComida: load('compraComida', 0),
+    propios: load('propios', defaultPropios),
+    extras: load('extras', []),
+    banks: load('banks', defaultBanks),
+    saldos: load('saldos', defaultBanks.reduce((acc, b) => { acc[b.id] = 0; return acc; }, {})),
+    steps: load('steps', defaultSteps),
+    stepsDone: load('stepsDone', defaultSteps.map(() => false)),
+    sueldoA: loadShared('sueldoA', 0),
+    sueldoB: loadShared('sueldoB', 0),
+    conceptos: loadShared('conceptos', DEFAULT_CONCEPTOS),
+    comidaConceptoId: loadShared('comidaConceptoId', 'comida'),
+  };
+}
+reloadState();
+
+// =============== CALCS ===============
+function propiosTotal() { return state.propios.reduce((s, p) => s + (Number(p.amount) || 0), 0); }
+function extraTotal() { return state.extras.reduce((s, p) => s + (Number(p.amount) || 0), 0); }
+function totalCompartidos() { return state.conceptos.reduce((s, c) => s + (Number(c.amount) || 0), 0); }
+function totalIngresos() { return state.sueldoA + state.sueldoB; }
+function pctARaw() { const t = totalIngresos(); return t > 0 ? state.sueldoA / t : 0; }
+function pctMica() { return 1 - pctARaw(); }
+
+// Reparto compartido con redondeo a entero, manteniendo suma exacta.
+// Redondea A y le da a B el resto.
+function aporteA() {
+  const t = totalCompartidos();
+  return Math.round(t * pctARaw());
+}
+function aporteB() {
+  return totalCompartidos() - aporteA();
+}
+function miAporteCompartidos() {
+  return mode === 'a' ? aporteA() : aporteB();
+}
+// Misma lógica pero quitando el concepto "comida"
+function miAporteSinComida() {
+  const comidaConcepto = state.conceptos.find(c => c.id === state.comidaConceptoId);
+  const totalSinComida = totalCompartidos() - (comidaConcepto ? Number(comidaConcepto.amount) || 0 : 0);
+  // Repartir el total sin comida con la misma proporción redondeando A
+  const aSinComida = Math.round(totalSinComida * pctARaw());
+  const bSinComida = totalSinComida - aSinComida;
+  return mode === 'a' ? aSinComida : bSinComida;
+}
+
+function viajesTotal() { return state.viajesFijo + state.ingles + propiosTotal(); }
+function asignadoTotal() {
+  return miAporteCompartidos() + propiosTotal() + state.ingles + state.acciones + state.ahorro + state.viajesFijo;
+}
+function ocioBase() {
+  return state.nomina - miAporteCompartidos() - propiosTotal() - state.ingles - state.ahorro - state.acciones - state.viajesFijo;
+}
+function ocioFinal() { return ocioBase() - extraTotal(); }
+
+// Dictionary de variables disponibles para las fórmulas
+function getVarsDict() {
+  return {
+    nomina: state.nomina,
+    ocio: ocioFinal(),
+    acciones: state.acciones,
+    propios: propiosTotal(),
+    ingles: state.ingles,
+    ahorro: state.ahorro,
+    viajesFijo: state.viajesFijo,
+    viajesTotal: viajesTotal(),
+    miAporteCompartidos: miAporteCompartidos(),
+    miAporteSinComida: miAporteSinComida(),
+    comidaCompra: state.compraComida,
+    psicologo: state.propios.find(p => p.name.toLowerCase().includes('psic'))?.amount || 0,
+    youtube: state.propios.find(p => p.name.toLowerCase().includes('youtube'))?.amount || 0,
+  };
+}
+function computeFormula(formula) {
+  const vars = getVarsDict();
+  return (formula || []).reduce((s, v) => s + (Number(vars[v]) || 0), 0);
+}
+function formulaLabel(formula) {
+  if (!formula || formula.length === 0) return '—';
+  return formula.map(v => FORMULA_VARS.find(x => x.id === v)?.label || v).join(' + ');
+}
+
+function fmt(n) { return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(Math.round(n * 100) / 100); }
+function fmtInt(n) { return new Intl.NumberFormat('es-ES').format(Math.round(n)); }
+function fmtPct(n) { return Math.round(n * 100) + '%'; }
+
+// =============== RENDER ===============
+function renderHeader() {
+  document.body.dataset.mode = mode;
+  document.getElementById('modeSubtitle').textContent = `Modo ${mode === 'a' ? 'A' : 'B'}`;
+  document.getElementById('configModeName').textContent = mode === 'a' ? 'A' : 'B';
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.modeBtn === mode);
+  });
+}
+
+function renderDesgloseRows() {
+  const rows = document.getElementById('desgloseRows');
+  rows.innerHTML = '';
+  const miPct = mode === 'a' ? pctARaw() : (1 - pctARaw());
+  const compartidosSubText = `tu parte (${fmtPct(miPct)} de ${fmtInt(totalCompartidos())} €)`;
+
+  rows.innerHTML += `
+    <div class="row">
+      <div class="name">Gastos compartidos
+        <span class="sub">${compartidosSubText}</span>
+      </div>
+      <div class="amount-display">${fmtInt(miAporteCompartidos())}</div>
+    </div>
+  `;
+
+  rows.innerHTML += `
+    <div class="row">
+      <div class="name">Gastos propios</div>
+      <div class="amount-display">${fmt(propiosTotal())}</div>
+    </div>
+    <div class="row">
+      <div class="name">Inglés</div>
+      <input type="number" class="amount-input" id="ingles" inputmode="decimal" value="${state.ingles}">
+    </div>
+    <div class="row">
+      <div class="name">Acciones</div>
+      <input type="number" class="amount-input" id="acciones" inputmode="decimal" value="${state.acciones}">
+    </div>
+    <div class="row">
+      <div class="name">Ahorro</div>
+      <input type="number" class="amount-input" id="ahorro" inputmode="decimal" value="${state.ahorro}">
+    </div>
+    <div class="row">
+      <div class="name">Aporte viajes</div>
+      <input type="number" class="amount-input" id="viajesFijo" inputmode="decimal" value="${state.viajesFijo}">
+    </div>
+  `;
+
+  rows.innerHTML += `
+    <div class="row total">
+      <div class="name">Total asignado</div>
+      <div class="amount-display">${fmt(asignadoTotal())}</div>
+    </div>
+  `;
+
+  // Re-bindear inputs que se acaban de crear
+  ['ingles', 'acciones', 'ahorro', 'viajesFijo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        state[id] = Number(el.value) || 0;
+        save(id, state[id]);
+        renderDesglose();
+        renderSteps();
+      });
+    }
+  });
+}
+
+function renderDesglose() {
+  document.getElementById('nomina').value = state.nomina;
+
+  renderDesgloseRows();
+
+  const ocio = ocioFinal();
+  document.getElementById('ocioVal').textContent = fmt(ocio);
+
+  let bd = `Base: ${fmt(ocioBase())} €`;
+  if (state.extras.length > 0) bd += ` − Extras: ${fmt(extraTotal())} €`;
+  bd += ` · +Acciones: ${fmt(ocio + state.acciones)} €`;
+  document.getElementById('ocioBreakdown').textContent = bd;
+  document.getElementById('ocioCard').classList.toggle('negative', ocio < 0);
+  renderSummaryBar();
+}
+
+function renderSummaryBar() {
+  if (state.nomina <= 0) return;
+  const accentColor = mode === 'b' ? '#c989b4' : '#7aa8d9';
+  const segs = [
+    { label: 'Compartidos', val: miAporteCompartidos(), color: '#7aa8d9' },
+    { label: 'Propios', val: propiosTotal(), color: '#b48ad9' },
+    { label: 'Ahorro', val: state.ahorro, color: '#7cb87c' },
+    { label: 'Viajes', val: state.viajesFijo, color: '#d9b87a' },
+    { label: 'Inglés', val: state.ingles, color: '#7aa8d9' },
+    { label: 'Acciones', val: state.acciones, color: '#d97a7a' },
+    { label: 'Ocio', val: Math.max(0, ocioFinal()), color: accentColor },
+  ];
+  const total = segs.reduce((s, x) => s + x.val, 0);
+  const bar = document.getElementById('summaryBar');
+  bar.innerHTML = '';
+  segs.forEach(s => {
+    if (s.val <= 0) return;
+    const d = document.createElement('div');
+    d.className = 'seg';
+    d.style.width = `${(s.val / total) * 100}%`;
+    d.style.background = s.color;
+    bar.appendChild(d);
+  });
+  document.getElementById('legend').innerHTML = segs.map(s => `
+    <div class="legend-item">
+      <span class="dot" style="background:${s.color}"></span>
+      <span>${s.label}</span>
+      <span class="val">${fmt(s.val)} €</span>
+    </div>
+  `).join('');
+}
+
+function renderCompartidos() {
+  document.getElementById('sueldoA').value = state.sueldoA;
+  document.getElementById('sueldoB').value = state.sueldoB;
+  document.getElementById('compraComida').value = state.compraComida;
+  document.getElementById('totalIngresos').textContent = fmtInt(totalIngresos());
+  document.getElementById('pctA').textContent = fmtPct(pctARaw());
+  document.getElementById('pctB').textContent = fmtPct(1 - pctARaw());
+  document.getElementById('pctAInline').textContent = fmtPct(pctARaw());
+  document.getElementById('pctBInline').textContent = fmtPct(1 - pctARaw());
+
+  document.getElementById('totalCompartidos').textContent = fmtInt(totalCompartidos());
+  document.getElementById('aportaA').textContent = fmtInt(aporteA());
+  document.getElementById('aportaB').textContent = fmtInt(aporteB());
+
+  // Selector de comida
+  const sel = document.getElementById('comidaConcepto');
+  sel.innerHTML = '<option value="">— ninguno —</option>' + state.conceptos.map(c =>
+    `<option value="${c.id}" ${c.id === state.comidaConceptoId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+  ).join('');
+
+  const list = document.getElementById('conceptosList');
+  list.innerHTML = '';
+  state.conceptos.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="name"><input type="text" data-i="${i}" data-field="name" value="${escapeHtml(c.name)}"></div>
+      <input type="number" class="amount-input" data-i="${i}" data-field="amount" value="${c.amount}" inputmode="decimal">
+      <button class="delete-btn" data-del="${i}" aria-label="Eliminar">×</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const i = +e.target.dataset.i;
+      const f = e.target.dataset.field;
+      if (f === 'amount') state.conceptos[i].amount = Number(e.target.value) || 0;
+      else state.conceptos[i].name = e.target.value;
+      saveShared('conceptos', state.conceptos);
+      renderCompartidos();
+      renderDesglose();
+      renderSteps();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.del;
+      state.conceptos.splice(i, 1);
+      saveShared('conceptos', state.conceptos);
+      renderCompartidos();
+      renderDesglose();
+      renderSteps();
+    });
+  });
+}
+
+function renderPropios() {
+  const list = document.getElementById('propiosList');
+  list.innerHTML = '';
+  state.propios.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="name"><input type="text" data-i="${i}" data-field="name" value="${escapeHtml(p.name)}"></div>
+      <input type="number" class="amount-input" data-i="${i}" data-field="amount" value="${p.amount}" inputmode="decimal">
+      <button class="delete-btn" data-del="${i}" aria-label="Eliminar">×</button>
+    `;
+    list.appendChild(row);
+  });
+  document.getElementById('propiosTotal2').textContent = fmt(propiosTotal());
+
+  list.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const i = +e.target.dataset.i;
+      const f = e.target.dataset.field;
+      if (f === 'amount') state.propios[i].amount = Number(e.target.value) || 0;
+      else state.propios[i].name = e.target.value;
+      save('propios', state.propios);
+      document.getElementById('propiosTotal2').textContent = fmt(propiosTotal());
+      renderDesglose();
+      renderSteps();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.del;
+      state.propios.splice(i, 1);
+      save('propios', state.propios);
+      renderPropios();
+      renderDesglose();
+      renderSteps();
+    });
+  });
+}
+
+function renderExtras() {
+  const list = document.getElementById('extraList');
+  list.innerHTML = '';
+  if (state.extras.length === 0) {
+    list.innerHTML = `<div class="row" style="color: var(--text-faint); justify-content: center; font-size: 13px;">Sin gastos extra este mes</div>`;
+  } else {
+    state.extras.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="name"><input type="text" data-i="${i}" data-field="name" value="${escapeHtml(p.name)}" placeholder="Descripción"></div>
+        <input type="number" class="amount-input" data-i="${i}" data-field="amount" value="${p.amount}" inputmode="decimal">
+        <button class="delete-btn" data-del="${i}" aria-label="Eliminar">×</button>
+      `;
+      list.appendChild(row);
+    });
+  }
+  document.getElementById('extraTotal').textContent = fmt(extraTotal());
+
+  list.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const i = +e.target.dataset.i;
+      const f = e.target.dataset.field;
+      if (f === 'amount') state.extras[i].amount = Number(e.target.value) || 0;
+      else state.extras[i].name = e.target.value;
+      save('extras', state.extras);
+      document.getElementById('extraTotal').textContent = fmt(extraTotal());
+      renderDesglose();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.del;
+      state.extras.splice(i, 1);
+      save('extras', state.extras);
+      renderExtras();
+      renderDesglose();
+    });
+  });
+}
+
+function bankName(id) {
+  return state.banks.find(b => b.id === id)?.name || id;
+}
+
+function renderSteps() {
+  const container = document.getElementById('stepsList');
+  container.innerHTML = '';
+  if (state.steps.length === 0) {
+    container.innerHTML = `<div class="extra-intro" style="text-align: center;">No hay pasos definidos.<br>Añade pasos en la pestaña Config.</div>`;
+    return;
+  }
+  state.steps.forEach((s, i) => {
+    const done = state.stepsDone[i];
+    const amount = computeFormula(s.formula);
+    const div = document.createElement('div');
+    div.className = 'step' + (done ? ' done' : '');
+    div.dataset.i = i;
+
+    const amountHtml = amount > 0
+      ? `<span class="step-amount">${fmt(amount)} €</span>`
+      : '';
+
+    let flowHtml = '';
+    if (s.from && s.to) {
+      flowHtml = `<div class="step-flow"><span class="bank-tag">${bankName(s.from)}</span><span>→</span><span class="bank-tag">${bankName(s.to)}</span></div>`;
+    } else if (s.from) {
+      flowHtml = `<div class="step-flow"><span>Desde</span><span class="bank-tag">${bankName(s.from)}</span></div>`;
+    } else if (s.to) {
+      flowHtml = `<div class="step-flow"><span>Hacia</span><span class="bank-tag">${bankName(s.to)}</span></div>`;
+    }
+
+    const detail = s.formula && s.formula.length > 0
+      ? `<div class="step-detail">${formulaLabel(s.formula)}</div>`
+      : '';
+
+    div.innerHTML = `
+      <div class="step-num"><span>${i + 1}</span></div>
+      <div class="step-text">
+        ${escapeHtml(s.name)}${amountHtml}
+        ${detail}
+        ${flowHtml}
+      </div>
+    `;
+    div.addEventListener('click', () => toggleStep(i));
+    container.appendChild(div);
+  });
+}
+
+function toggleStep(i) {
+  const s = state.steps[i];
+  const amount = computeFormula(s.formula);
+  const wasDone = state.stepsDone[i];
+  const willBeDone = !wasDone;
+
+  if (amount > 0 && s.from && s.to) {
+    const sign = willBeDone ? 1 : -1;
+    state.saldos[s.from] = (state.saldos[s.from] || 0) - amount * sign;
+    state.saldos[s.to] = (state.saldos[s.to] || 0) + amount * sign;
+    save('saldos', state.saldos);
+  }
+
+  state.stepsDone[i] = willBeDone;
+  save('stepsDone', state.stepsDone);
+  renderSteps();
+  renderBanks();
+}
+
+function renderBanks() {
+  const list = document.getElementById('banksList');
+  list.innerHTML = '';
+  state.banks.forEach(b => {
+    const val = state.saldos[b.id] || 0;
+    const row = document.createElement('div');
+    row.className = 'bank-row';
+    row.innerHTML = `
+      <div class="bank-info">
+        <div class="bank-name">${escapeHtml(b.name)}</div>
+        <div class="bank-role">${escapeHtml(b.role)}</div>
+      </div>
+      <input type="number" class="amount-input" data-bank="${b.id}" value="${val.toFixed(2)}" inputmode="decimal" step="0.01">
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      state.saldos[e.target.dataset.bank] = Number(e.target.value) || 0;
+      save('saldos', state.saldos);
+    });
+  });
+}
+
+// =============== CONFIG ===============
+function renderBanksConfig() {
+  const list = document.getElementById('banksConfigList');
+  list.innerHTML = '';
+  state.banks.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = 'stretch';
+    row.style.gap = '6px';
+    row.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="text" data-i="${i}" data-field="name" value="${escapeHtml(b.name)}" placeholder="Nombre" style="flex:1; background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 6px; color: var(--text); font-size: 13.5px; padding: 6px 10px; outline: none;">
+        <button class="delete-btn" data-del="${i}" aria-label="Eliminar">×</button>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <input type="text" data-i="${i}" data-field="role" value="${escapeHtml(b.role)}" placeholder="Rol / descripción" style="flex:1; background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 6px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11.5px; padding: 5px 9px; outline: none;">
+      </div>
+      <div style="font-size: 10.5px; color: var(--text-faint); font-family: var(--font-mono);">id: ${b.id}</div>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const i = +e.target.dataset.i;
+      const f = e.target.dataset.field;
+      state.banks[i][f] = e.target.value;
+      save('banks', state.banks);
+      renderBanks();
+      renderSteps();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.del;
+      if (confirm(`¿Eliminar la cuenta "${state.banks[i].name}"?`)) {
+        const id = state.banks[i].id;
+        state.banks.splice(i, 1);
+        delete state.saldos[id];
+        save('banks', state.banks);
+        save('saldos', state.saldos);
+        renderBanksConfig();
+        renderBanks();
+        renderStepsEditor();
+        renderSteps();
+      }
+    });
+  });
+}
+
+function bankOptions(selectedId) {
+  return '<option value="">—</option>' + state.banks.map(b =>
+    `<option value="${b.id}" ${b.id === selectedId ? 'selected' : ''}>${escapeHtml(b.name)}</option>`
+  ).join('');
+}
+
+function renderStepsEditor() {
+  const container = document.getElementById('stepsEditor');
+  container.innerHTML = '';
+  state.steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'edit-step';
+    div.innerHTML = `
+      <div class="edit-step-header">
+        <div class="num">${i + 1}</div>
+        <input type="text" data-i="${i}" data-field="name" value="${escapeHtml(s.name)}" placeholder="Nombre del paso">
+      </div>
+      <div class="edit-field">
+        <label>Desde</label>
+        <select data-i="${i}" data-field="from">${bankOptions(s.from)}</select>
+      </div>
+      <div class="edit-field">
+        <label>Hacia</label>
+        <select data-i="${i}" data-field="to">${bankOptions(s.to)}</select>
+      </div>
+      <div class="edit-field" style="align-items: flex-start;">
+        <label style="padding-top: 4px;">Fórmula</label>
+        <div class="formula-pills" data-i="${i}">
+          ${(s.formula || []).map((v, vi) => `
+            <span class="pill active">
+              ${FORMULA_VARS.find(x => x.id === v)?.label || v}
+              <button class="pill-remove" data-i="${i}" data-vi="${vi}">×</button>
+            </span>
+          `).join('')}
+          <select class="pill-add-select" data-i="${i}">
+            <option value="">+ añadir variable</option>
+            ${FORMULA_VARS.map(v => `<option value="${v.id}">${v.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="formula-preview">= ${fmt(computeFormula(s.formula))} €</div>
+      <div class="edit-step-actions">
+        <button data-up="${i}" ${i === 0 ? 'disabled style="opacity:0.3"' : ''}>↑ Subir</button>
+        <button data-down="${i}" ${i === state.steps.length - 1 ? 'disabled style="opacity:0.3"' : ''}>↓ Bajar</button>
+        <button class="danger" data-del-step="${i}">Eliminar</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Eventos
+  container.querySelectorAll('input[data-field="name"]').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const i = +e.target.dataset.i;
+      state.steps[i].name = e.target.value;
+      save('steps', state.steps);
+      renderSteps();
+    });
+  });
+  container.querySelectorAll('select[data-field="from"], select[data-field="to"]').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const i = +e.target.dataset.i;
+      const f = e.target.dataset.field;
+      state.steps[i][f] = e.target.value || null;
+      save('steps', state.steps);
+      renderSteps();
+    });
+  });
+  container.querySelectorAll('.pill-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.i;
+      const vi = +e.currentTarget.dataset.vi;
+      state.steps[i].formula.splice(vi, 1);
+      save('steps', state.steps);
+      renderStepsEditor();
+      renderSteps();
+    });
+  });
+  container.querySelectorAll('.pill-add-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const i = +e.target.dataset.i;
+      const v = e.target.value;
+      if (v) {
+        if (!state.steps[i].formula) state.steps[i].formula = [];
+        state.steps[i].formula.push(v);
+        save('steps', state.steps);
+        renderStepsEditor();
+        renderSteps();
+      }
+    });
+  });
+  container.querySelectorAll('[data-up]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.up;
+      if (i > 0) {
+        [state.steps[i - 1], state.steps[i]] = [state.steps[i], state.steps[i - 1]];
+        [state.stepsDone[i - 1], state.stepsDone[i]] = [state.stepsDone[i], state.stepsDone[i - 1]];
+        save('steps', state.steps);
+        save('stepsDone', state.stepsDone);
+        renderStepsEditor();
+        renderSteps();
+      }
+    });
+  });
+  container.querySelectorAll('[data-down]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.down;
+      if (i < state.steps.length - 1) {
+        [state.steps[i + 1], state.steps[i]] = [state.steps[i], state.steps[i + 1]];
+        [state.stepsDone[i + 1], state.stepsDone[i]] = [state.stepsDone[i], state.stepsDone[i + 1]];
+        save('steps', state.steps);
+        save('stepsDone', state.stepsDone);
+        renderStepsEditor();
+        renderSteps();
+      }
+    });
+  });
+  container.querySelectorAll('[data-del-step]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = +e.currentTarget.dataset.delStep;
+      if (confirm(`¿Eliminar el paso "${state.steps[i].name}"?`)) {
+        state.steps.splice(i, 1);
+        state.stepsDone.splice(i, 1);
+        save('steps', state.steps);
+        save('stepsDone', state.stepsDone);
+        renderStepsEditor();
+        renderSteps();
+      }
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =============== EVENTOS ESTÁTICOS ===============
+function bindInput(id, key, isShared = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    state[key] = Number(el.value) || 0;
+    if (isShared) saveShared(key, state[key]);
+    else save(key, state[key]);
+    renderDesglose();
+    renderCompartidos();
+    renderSteps();
+    renderStepsEditor();
+  });
+}
+bindInput('nomina', 'nomina');
+bindInput('compraComida', 'compraComida');
+bindInput('sueldoA', 'sueldoA', true);
+bindInput('sueldoB', 'sueldoB', true);
+
+document.getElementById('comidaConcepto').addEventListener('change', (e) => {
+  state.comidaConceptoId = e.target.value;
+  saveShared('comidaConceptoId', state.comidaConceptoId);
+  renderDesglose();
+  renderSteps();
+  renderStepsEditor();
+});
+
+document.querySelectorAll('.mode-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    mode = b.dataset.modeBtn;
+    localStorage.setItem('nom_mode', mode);
+    reloadState();
+    renderAll();
+  });
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+document.getElementById('addPropio').addEventListener('click', () => {
+  state.propios.push({ name: 'Nuevo', amount: 0 });
+  save('propios', state.propios);
+  renderPropios(); renderDesglose(); renderSteps();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#propiosList input[type="text"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+});
+document.getElementById('addExtra').addEventListener('click', () => {
+  state.extras.push({ name: '', amount: 0 });
+  save('extras', state.extras);
+  renderExtras(); renderDesglose();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#extraList input[type="text"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+});
+document.getElementById('addConcepto').addEventListener('click', () => {
+  const newId = 'c' + Date.now();
+  state.conceptos.push({ id: newId, name: 'Nuevo', amount: 0 });
+  saveShared('conceptos', state.conceptos);
+  renderCompartidos(); renderDesglose(); renderSteps();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#conceptosList input[type="text"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+});
+
+document.getElementById('addBank').addEventListener('click', () => {
+  const newId = 'b' + Date.now();
+  state.banks.push({ id: newId, name: 'Cuenta', role: '' });
+  state.saldos[newId] = 0;
+  save('banks', state.banks);
+  save('saldos', state.saldos);
+  renderBanksConfig(); renderBanks(); renderStepsEditor();
+});
+
+document.getElementById('addStep').addEventListener('click', () => {
+  state.steps.push({ name: 'Nuevo paso', from: null, to: null, formula: [] });
+  state.stepsDone.push(false);
+  save('steps', state.steps);
+  save('stepsDone', state.stepsDone);
+  renderStepsEditor(); renderSteps();
+});
+
+document.getElementById('resetExtra').addEventListener('click', () => {
+  if (state.extras.length === 0 || confirm('¿Vaciar todos los gastos extra del mes?')) {
+    state.extras = [];
+    save('extras', state.extras);
+    renderExtras(); renderDesglose();
+  }
+});
+
+document.getElementById('resetSteps').addEventListener('click', () => {
+  if (confirm('¿Reiniciar pasos? (No deshace los movimientos en saldos)')) {
+    state.stepsDone = state.steps.map(() => false);
+    save('stepsDone', state.stepsDone);
+    renderSteps();
+  }
+});
+
+document.getElementById('receiveSalary').addEventListener('click', () => {
+  if (confirm(`¿Sumar ${fmt(state.nomina)} € a la cuenta principal?`)) {
+    state.saldos.principal = (state.saldos.principal || 0) + state.nomina;
+    save('saldos', state.saldos);
+    renderBanks();
+  }
+});
+
+document.getElementById('resetBanks').addEventListener('click', () => {
+  if (confirm('¿Poner todos los saldos a 0?')) {
+    state.banks.forEach(b => state.saldos[b.id] = 0);
+    save('saldos', state.saldos);
+    renderBanks();
+  }
+});
+
+function renderAll() {
+  renderHeader();
+  renderDesglose();
+  renderCompartidos();
+  renderPropios();
+  renderExtras();
+  renderSteps();
+  renderBanks();
+  renderBanksConfig();
+  renderStepsEditor();
+}
+
+renderAll();
+</script>
+</body>
+</html>
